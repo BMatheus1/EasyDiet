@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { approveOrder, createOrder, getCatalog, getQuote, Ingredient, QuotePayload } from "../src/api";
 import { useBuilderStore } from "../src/store";
-import { Accordion, BottomMenu, ChoiceCard, InfoBanner, IngredientCard, PriceSummaryBar, PrimaryButton, SecondaryButton, StepHeader, brl, colors } from "../src/ui";
+import { Accordion, BottomMenu, ChoiceCard, InfoBanner, IngredientCard, PriceSummaryBar, PrimaryButton, SecondaryButton, StepHeader, StepProgress, brl, colors } from "../src/ui";
 import { useDebouncedValue } from "../src/useDebouncedValue";
 
 const restrictions = [
@@ -45,16 +45,13 @@ export default function Builder() {
           <Pressable onPress={() => setStep((value) => Math.max(value - 1, 1))} style={styles.iconButton}>
             <Ionicons name="arrow-back" size={20} color="#17211D" />
           </Pressable>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${(step / 8) * 100}%` }]} />
-          </View>
-          <Text style={styles.progressText}>{step}/8</Text>
+          <StepProgress current={step} total={8} />
         </View>
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {step === 1 ? (
             <>
-              <StepHeader step={1} title="Duracao do plano" subtitle="Escolha por quantas semanas deseja deixar sua rotina organizada." />
+              <StepHeader step={1} title="Por quantas semanas quer se organizar?" subtitle="Voce pode montar um plano de 1 a 4 semanas." />
               {[1, 2, 3, 4].map((weeks) => (
                 <ChoiceCard key={weeks} icon="calendar-outline" title={`${weeks} semana${weeks > 1 ? "s" : ""}`} subtitle="Organize sua rotina com previsibilidade." selected={store.weeks === weeks} onPress={() => store.set("weeks", weeks)} />
               ))}
@@ -93,7 +90,7 @@ export default function Builder() {
             </>
           ) : null}
 
-          {step === 5 ? <IngredientStep step={5} title="Proteinas" subtitle="Marque as proteinas que aceita no plano." groups={grouped.protein} selected={store.proteins} onToggle={(id) => store.toggleIn("proteins", id)} /> : null}
+          {step === 5 ? <IngredientStep step={5} title="Escolha suas proteinas" subtitle="Marque as opcoes que voce gostaria de receber no seu plano." groups={grouped.protein} selected={store.proteins} onToggle={(id) => store.toggleIn("proteins", id)} /> : null}
           {step === 6 ? <IngredientStep step={6} title="Carboidratos" subtitle="Escolha opcoes para variar sua semana." groups={grouped.carb} selected={store.carbs} onToggle={(id) => store.toggleIn("carbs", id)} /> : null}
 
           {step === 7 ? (
@@ -161,7 +158,7 @@ function IngredientStep({ step, title, subtitle, groups, selected, onToggle }: {
       <StepHeader step={step} title={title} subtitle={subtitle} />
       <InfoBanner text="Ingredientes Premium podem alterar o valor e o prazo. Tudo aparece no resumo antes de confirmar." />
       {Object.entries(groups).map(([name, items]) => (
-        <Accordion key={name} title={name} defaultOpen={items.length <= 6}>
+        <Accordion key={name} title={name} selectedCount={items.filter((item) => selected.includes(item.id)).length} icon={accordionIcon(name)} defaultOpen={items.length <= 6}>
           <View style={{ height: Math.min(360, Math.max(96, items.length * 76)) }}>
             <FlashList
               data={items}
@@ -227,14 +224,22 @@ function sumGrams(values: { protein: number; carb: number; vegetable: number }) 
   return values.protein + values.carb + values.vegetable;
 }
 
+function accordionIcon(name: string) {
+  const normalized = name.toLowerCase();
+  if (normalized.includes("ave")) return "leaf-outline" as const;
+  if (normalized.includes("bovin")) return "medal-outline" as const;
+  if (normalized.includes("peix")) return "fish-outline" as const;
+  if (normalized.includes("arroz") || normalized.includes("graos")) return "nutrition-outline" as const;
+  if (normalized.includes("tub")) return "earth-outline" as const;
+  if (normalized.includes("verd")) return "flower-outline" as const;
+  return "albums-outline" as const;
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F4F7F2" },
   body: { flex: 1, paddingBottom: 172 },
   topbar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, paddingVertical: 14 },
   iconButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center" },
-  progressTrack: { flex: 1, height: 8, marginHorizontal: 16, overflow: "hidden", borderRadius: 99, backgroundColor: "rgba(23,33,29,0.1)" },
-  progressFill: { height: "100%", borderRadius: 99, backgroundColor: colors.gold },
-  progressText: { color: colors.forest, fontWeight: "900" },
   content: { gap: 18, paddingHorizontal: 20, paddingBottom: 32 },
   wrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   card: { gap: 12, borderRadius: 24, borderWidth: 1, borderColor: "rgba(18,61,46,0.08)", backgroundColor: "#FFFDF8", padding: 18 },

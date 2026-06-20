@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { AppLogo, BottomMenu, PremiumCard, PrimaryButton, SecondaryButton, colors } from "../src/ui";
+import { AppLogo, BottomMenu, PremiumCard, PrimaryButton, SecondaryButton, StatusBadge, colors } from "../src/ui";
 
 const benefits = [
   {
@@ -43,6 +43,24 @@ export default function Home() {
           </View>
           <Text style={styles.heroTitle}>Sua semana alimentar pronta, pesada e personalizada.</Text>
           <Text style={styles.heroCopy}>Voce escolhe os ingredientes e quantidades. Nos cuidamos da compra, preparo, congelamento e entrega.</Text>
+          <PremiumCard style={styles.visualCard}>
+            <View style={styles.visualTop}>
+              <View>
+                <Text style={styles.visualEyebrow}>Plano da semana</Text>
+                <Text style={styles.visualTitle}>10 marmitas organizadas</Text>
+              </View>
+              <StatusBadge label="Premium" tone="gold" />
+            </View>
+            <View style={styles.mealMock}>
+              <View style={[styles.mealPart, styles.mealProtein]} />
+              <View style={[styles.mealPart, styles.mealCarb]} />
+              <View style={[styles.mealPart, styles.mealVeg]} />
+            </View>
+            <View style={styles.visualStats}>
+              <Text style={styles.visualStat}>Proteina pesada</Text>
+              <Text style={styles.visualStat}>Entrega programada</Text>
+            </View>
+          </PremiumCard>
           <View style={styles.actions}>
             <PrimaryButton onPress={() => router.push("/builder")}>Montar meu plano</PrimaryButton>
             <SecondaryButton onPress={() => router.push("/how-it-works")}>Como funciona</SecondaryButton>
@@ -76,6 +94,17 @@ const styles = StyleSheet.create({
   heroTitle: { color: colors.ink, fontSize: 40, lineHeight: 46, fontWeight: "900", letterSpacing: 0 },
   heroCopy: { color: colors.muted, fontSize: 17, lineHeight: 26 },
   actions: { gap: 12, marginTop: 4 },
+  visualCard: { gap: 14, marginTop: 2 },
+  visualTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  visualEyebrow: { color: colors.gold, fontSize: 12, fontWeight: "900", textTransform: "uppercase" },
+  visualTitle: { color: colors.ink, fontSize: 20, fontWeight: "900", marginTop: 2 },
+  mealMock: { height: 116, borderRadius: 28, borderWidth: 1, borderColor: colors.line, backgroundColor: "#FFFFFF", overflow: "hidden", flexDirection: "row", padding: 12, gap: 10 },
+  mealPart: { flex: 1, borderRadius: 22 },
+  mealProtein: { backgroundColor: "#E8C7B2" },
+  mealCarb: { backgroundColor: "#F3E5B5" },
+  mealVeg: { backgroundColor: "#BBD8BE" },
+  visualStats: { flexDirection: "row", justifyContent: "space-between", gap: 12 },
+  visualStat: { color: colors.muted, fontSize: 12, fontWeight: "800" },
   benefitsGrid: { gap: 12 },
   benefitCard: { gap: 10 },
   benefitIcon: { width: 42, height: 42, borderRadius: 16, backgroundColor: colors.mint, alignItems: "center", justifyContent: "center" },

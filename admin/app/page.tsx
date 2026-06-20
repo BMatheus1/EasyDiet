@@ -38,7 +38,7 @@ const menuItems = [
   ["Lotes", Boxes],
   ["Lista de compras", ShoppingBasket],
   ["Ingredientes", Utensils],
-  ["Configuracoes de preco", Settings],
+  ["Precos e margens", Settings],
   ["Entregas", Truck],
   ["Etiquetas", Tags]
 ] as const;
@@ -84,25 +84,7 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-[#F4F7F2] text-[#17211D]">
-      <aside className="fixed bottom-0 left-0 top-0 hidden w-72 border-r border-black/10 bg-[#FFFDF8] p-5 lg:block">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#123D2E] text-white shadow-lg">
-            <Leaf size={25} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black">EasyDiet</h1>
-            <p className="text-xs font-bold text-black/45">Painel operacional</p>
-          </div>
-        </div>
-        <nav className="space-y-2">
-          {menuItems.map(([label, Icon], index) => (
-            <a key={label} href={index === 4 ? "#ingredientes" : index === 1 ? "#pedidos" : "#dashboard"} className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-black ${index === 0 ? "bg-[#123D2E] text-white" : "text-black/65 hover:bg-[#EAF4EA]"}`}>
-              <Icon size={18} />
-              {label}
-            </a>
-          ))}
-        </nav>
-      </aside>
+      <AdminSidebar />
 
       <section className="lg:pl-72">
         <header id="dashboard" className="border-b border-black/10 bg-[#FFFDF8]">
@@ -119,14 +101,14 @@ export default function AdminPage() {
         </header>
 
         <section className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-5 py-6 md:grid-cols-4">
-          <Metric icon={<PackageCheck />} label="Pedidos pagos" value={dashboard?.paid_orders ?? 0} />
-          <Metric icon={<Boxes />} label="Marmitas vendidas" value={dashboard?.meals_sold ?? 0} />
-          <Metric icon={<BadgeDollarSign />} label="Receita confirmada" value={brl(dashboard?.confirmed_revenue ?? 0)} />
-          <Metric icon={<ShoppingBasket />} label="Custo estimado" value={brl(dashboard?.estimated_cost ?? 0)} />
-          <Metric icon={<Truck />} label="Lucro estimado" value={brl(dashboard?.estimated_profit ?? 0)} />
-          <Metric icon={<CalendarClock />} label="Margem media" value={`${Math.round((dashboard?.average_margin ?? 0) * 100)}%`} />
-          <Metric icon={<Boxes />} label="Lote atual" value={`${dashboard?.current_batch_meals ?? 0} marmitas`} />
-          <Metric icon={<ClipboardList />} label="Proximos do prazo" value="0 alertas" />
+          <AdminMetricCard icon={<PackageCheck />} label="Pedidos pagos" value={dashboard?.paid_orders ?? 0} />
+          <AdminMetricCard icon={<Boxes />} label="Marmitas vendidas" value={dashboard?.meals_sold ?? 0} />
+          <AdminMetricCard icon={<BadgeDollarSign />} label="Receita confirmada" value={brl(dashboard?.confirmed_revenue ?? 0)} />
+          <AdminMetricCard icon={<ShoppingBasket />} label="Custo estimado" value={brl(dashboard?.estimated_cost ?? 0)} />
+          <AdminMetricCard icon={<Truck />} label="Lucro estimado" value={brl(dashboard?.estimated_profit ?? 0)} />
+          <AdminMetricCard icon={<CalendarClock />} label="Margem media" value={`${Math.round((dashboard?.average_margin ?? 0) * 100)}%`} />
+          <AdminMetricCard icon={<Boxes />} label="Lote atual" value={`${dashboard?.current_batch_meals ?? 0} marmitas`} />
+          <AdminMetricCard icon={<ClipboardList />} label="Entregas proximas" value="0 alertas" />
         </section>
 
         <section id="pedidos" className="mx-auto max-w-7xl px-5 pb-8">
@@ -162,32 +144,15 @@ export default function AdminPage() {
             </div>
             {filtered.map((order) => (
               <div key={order.id} className="border-b border-black/10 last:border-b-0">
-                <div className="grid grid-cols-1 gap-3 px-5 py-5 md:grid-cols-7 md:items-center">
-                  <strong>#{order.id} {order.customer_name}</strong>
-                  <span>{order.request.weeks} sem. / {order.request.days_per_week} dias</span>
-                  <span>{order.quote.client.total_meals}</span>
-                  <span className="font-black">{brl(order.quote.client.final_price)}</span>
-                  <StatusBadge status={order.payment_status} />
-                  <span>{order.quote.client.preparation_days} dias uteis</span>
-                  <div className="flex flex-wrap gap-2">
-                    {order.payment_status !== "approved" ? (
-                      <button
-                        onClick={async () => {
-                          await approvePayment(order.id);
-                          await refresh();
-                        }}
-                        className="rounded-xl bg-[#123D2E] px-3 py-2 text-sm font-black text-white"
-                      >
-                        Aprovar
-                      </button>
-                    ) : null}
-                    <button className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-black">Producao</button>
-                    <button className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-black">Compras</button>
-                    <button onClick={() => setOpenId(openId === order.id ? null : order.id)} className="rounded-xl border border-black/10 bg-white px-3 py-2">
-                      <ChevronDown size={18} />
-                    </button>
-                  </div>
-                </div>
+                <AdminOrderCard
+                  order={order}
+                  isOpen={openId === order.id}
+                  onToggle={() => setOpenId(openId === order.id ? null : order.id)}
+                  onApprove={async () => {
+                    await approvePayment(order.id);
+                    await refresh();
+                  }}
+                />
                 {openId === order.id ? <OrderDetail order={order} /> : null}
               </div>
             ))}
@@ -222,12 +187,63 @@ export default function AdminPage() {
   );
 }
 
-function Metric({ icon, label, value }: { icon: ReactNode; label: string; value: string | number }) {
+function AdminSidebar() {
+  return (
+    <aside className="fixed bottom-0 left-0 top-0 hidden w-72 border-r border-black/10 bg-[#FFFDF8] p-5 lg:block">
+      <div className="mb-8 flex items-center gap-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#123D2E] text-white shadow-lg">
+          <Leaf size={25} />
+        </div>
+        <div>
+          <h1 className="text-2xl font-black">EasyDiet</h1>
+          <p className="text-xs font-bold text-black/45">Painel operacional</p>
+        </div>
+      </div>
+      <nav className="space-y-2">
+        {menuItems.map(([label, Icon], index) => (
+          <a key={label} href={index === 4 ? "#ingredientes" : index === 1 ? "#pedidos" : "#dashboard"} className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-black ${index === 0 ? "bg-[#123D2E] text-white" : "text-black/65 hover:bg-[#EAF4EA]"}`}>
+            <Icon size={18} />
+            {label}
+          </a>
+        ))}
+      </nav>
+    </aside>
+  );
+}
+
+function AdminMetricCard({ icon, label, value }: { icon: ReactNode; label: string; value: string | number }) {
   return (
     <div className="rounded-3xl border border-black/10 bg-[#FFFDF8] p-5 shadow-sm">
       <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#123D2E] text-white">{icon}</div>
       <p className="text-sm font-bold text-black/55">{label}</p>
       <strong className="mt-1 block text-2xl">{value}</strong>
+    </div>
+  );
+}
+
+function AdminOrderCard({ order, isOpen, onToggle, onApprove }: { order: Order; isOpen: boolean; onToggle: () => void; onApprove: () => void }) {
+  return (
+    <div className="grid grid-cols-1 gap-3 px-5 py-5 md:grid-cols-7 md:items-center">
+      <strong>#{order.id} {order.customer_name}</strong>
+      <span>{order.request.weeks} sem. / {order.request.days_per_week} dias</span>
+      <span>{order.quote.client.total_meals}</span>
+      <span className="font-black">{brl(order.quote.client.final_price)}</span>
+      <StatusBadge status={order.payment_status} />
+      <span>{order.quote.client.preparation_days} dias uteis</span>
+      <div className="flex flex-wrap gap-2">
+        {order.payment_status !== "approved" ? (
+          <button onClick={onApprove} className="rounded-xl bg-[#123D2E] px-3 py-2 text-sm font-black text-white">
+            Aprovar
+          </button>
+        ) : null}
+        <button onClick={onToggle} className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-black">Ver pedido</button>
+        <button className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-black">Ver producao</button>
+        <button className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-black">Lista de compras</button>
+        <button className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-black">Gerar etiquetas</button>
+        <button onClick={onToggle} aria-label={isOpen ? "Fechar detalhes" : "Abrir detalhes"} className="rounded-xl border border-black/10 bg-white px-3 py-2">
+          <ChevronDown size={18} className={isOpen ? "rotate-180" : ""} />
+        </button>
+      </div>
     </div>
   );
 }
