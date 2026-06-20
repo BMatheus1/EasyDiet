@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+.expo/
+.next/
+dist/
+build/
+.env
+.env.local
+*.tsbuildinfo

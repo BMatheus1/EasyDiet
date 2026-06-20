@@ -1,0 +1,7 @@
+fastapi==0.124.2
+uvicorn[standard]==0.38.0
+pydantic==2.12.5
+SQLAlchemy==2.0.45
+alembic==1.17.2
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4

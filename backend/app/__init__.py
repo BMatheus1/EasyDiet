@@ -1,0 +1,1 @@
+"""EasyDiet backend package."""

@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "EasyDiet",
+    "slug": "easydiet",
+    "scheme": "easydiet",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router"],
+    "extra": {
+      "router": {}
+    }
+  }
+}
