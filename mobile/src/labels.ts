@@ -40,3 +40,18 @@ export function ingredientDescription(tier: string) {
   if (tier === "premium") return "Escolha refinada, com impacto no prazo e valor.";
   return "Base equilibrada para a rotina.";
 }
+
+export function proteinDescription(name: string, tier: string) {
+  const normalized = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  if (normalized.includes("file mignon")) return "Corte macio e nobre para planos especiais.";
+  if (normalized.includes("picanha")) return "Corte marcante para uma experiencia mais premium.";
+  if (normalized.includes("alcatra")) return "Corte versatil, macio e muito pedido.";
+  if (normalized.includes("patinho")) return "Opcao magra, pratica e equilibrada.";
+  if (normalized.includes("frango") || normalized.includes("sassami")) return "Leve, versatil e facil de combinar na rotina.";
+  if (normalized.includes("peru")) return "Opcao leve com perfil mais refinado.";
+  if (normalized.includes("ovo")) return "Alternativa simples, proteica e vegetariana.";
+  if (normalized.includes("tilapia") || normalized.includes("salmao") || normalized.includes("atum")) return "Proteina leve com preparo delicado.";
+  if (normalized.includes("camarao") || normalized.includes("lula")) return "Opcao especial que pode alterar valor e prazo.";
+  if (normalized.includes("tofu") || normalized.includes("lentilha") || normalized.includes("grao") || normalized.includes("soja")) return "Alternativa vegetal para variar o plano.";
+  return ingredientDescription(tier);
+}

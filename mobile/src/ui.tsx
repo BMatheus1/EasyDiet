@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router, usePathname } from "expo-router";
 import { PropsWithChildren, ReactNode, memo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { ingredientDescription, labelFrom, tierLabels } from "./labels";
+import { ingredientDescription, labelFrom, proteinDescription, tierLabels } from "./labels";
 import type { Ingredient } from "./api";
 
 export const colors = {
@@ -100,7 +100,7 @@ export const IngredientCard = memo(function IngredientCard({ item, selected, onP
       <View style={styles.ingredientTop}>
         <View style={styles.flex}>
           <Text style={styles.ingredientName}>{item.name}</Text>
-          <Text style={styles.ingredientDescription}>{ingredientDescription(item.tier)}</Text>
+          <Text style={styles.ingredientDescription}>{item.category === "protein" ? proteinDescription(item.name, item.tier) : ingredientDescription(item.tier)}</Text>
         </View>
         <Ionicons name={selected ? "checkmark-circle" : "add-circle-outline"} size={25} color={selected ? colors.forest : colors.muted} />
       </View>
